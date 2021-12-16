@@ -7,8 +7,6 @@ import threading
 
 class SunFounderController():
 
-    
-    recv_flag = False
 
     send_dict = {
         'Name': '',
@@ -44,7 +42,8 @@ class SunFounderController():
         self.tasks = asyncio.ensure_future(tasks)
         self.loop = asyncio.get_event_loop()
         self.thread = threading.Thread(target=self.start_work, name="Websocket_thread")
-
+        self.is_received = False
+        
     async def main(self, websocket, path):
         print('client conneted')
         while True:
@@ -69,7 +68,7 @@ class SunFounderController():
                     tmp = json.loads(tmp)
                     if isinstance(tmp, dict):
                         self.recv_dict = tmp
-                        self.recv_flag = True
+                        self.is_received = True
                         self.data_processing()
                     else:
                         print("JSONDecodeError")
@@ -122,7 +121,7 @@ if __name__ == "__main__":
     sc.start()
     
     while True:
-        if sc.recv_flag is True:
+        if sc.is_received is True:
             # get
             print(sc.recv_dict)
             # set       
