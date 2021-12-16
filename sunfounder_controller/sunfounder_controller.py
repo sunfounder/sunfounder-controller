@@ -12,28 +12,29 @@ class SunFounderController():
 
     send_dict = {
         'Name': '',
-        'Type': 'PICO-4WD Car',
+        'Type': None,
         'Check': 'SunFounder Controller',
         }
 
     recv_dict = {
-        'A_region': None,
-        'B_region': None,
-        'C_region': None,
-        'D_region': None,
-        'E_region': None,
-        'F_region': None,
-        'G_region': None,
-        'H_region': None,
-        'I_region': None,
-        'J_region': None,
-        'K_region': None,
-        'L_region': None,
-        'M_region': None,
-        'N_region': None,
-        'O_region': None,
-        'P_region': None,
-        'Q_region': None,
+        'A': None,
+        'B': None,
+        'C': None,
+        'D': None,
+        'E': None,
+        'F': None,
+        'G': None,
+        'H': None,
+        'I': None,
+        'J': None,
+        'K': None,
+        'L': None,
+        'M': None,
+        'N': None,
+        'O': None,
+        'P': None,
+        'Q': None,
+        'Heart':None
     }
     
 
@@ -45,20 +46,49 @@ class SunFounderController():
         self.thread = threading.Thread(target=self.start_work, name="Websocket_thread")
 
     async def main(self, websocket, path):
-        while 1:
-            await websocket.send(json.dumps(self.send_dict))
-            tmp = await websocket.recv()
-            # print("websocket.recv() temp: %s" % tmp)
+        print('client conneted')
+        while True:
             try:
-                tmp = json.loads(tmp)
-                if isinstance(tmp, dict):
-                    self.recv_dict = tmp
-                    self.recv_flag = True
-                else:
+                # recv
+                try:
+                    tmp = await asyncio.wait_for(websocket.recv(), timeout=0.001)
+                    # print("websocket.recv() temp: %s" % tmp)
+                except asyncio.TimeoutError as e:
+                    # log('asyncio.TimeoutError : %s'%e)
+                    pass
+
+                # send
+                try:
+                    # print(json.dumps(self.send_dict))
+                    await websocket.send(json.dumps(self.send_dict))
+                except Exception as e:
+                    print('send Exception: %s'%e)
+
+                # 
+                try:
+                    tmp = json.loads(tmp)
+                    if isinstance(tmp, dict):
+                        self.recv_dict = tmp
+                        self.recv_flag = True
+                        self.data_processing()
+                    else:
+                        print("JSONDecodeError")
+                except json.decoder.JSONDecodeError:
                     print("JSONDecodeError")
-            except json.decoder.JSONDecodeError:
-                print("JSONDecodeError")
-            await asyncio.sleep(0.01)
+                except Exception as e:
+                    pass
+
+                await asyncio.sleep(0.01)
+
+            except websockets.exceptions.ConnectionClosed as connection_code:
+                # disconneted flag
+                print(connection_code)
+                print('client disconneted')
+                break   
+
+    def data_processing(self):
+        if self.recv_dict['Heart'] == 'ping':    
+            self.send_dict['Heart'] = 'pong'
 
     def start_work(self):
         print('Start!')
@@ -68,14 +98,22 @@ class SunFounderController():
     def start(self):
         self.thread.start()
 
-    def get(self,key='A_region', default=None):
+    def get(self,key='A', default=None):
         # if not isinstance(self.recv_dict, dict):
         #     raise ValueError("recv_dict type error. type '%s', value: '%s'" % (type(self.recv_dict), self.recv_dict))
         return self.recv_dict.get(key, default)
 
+    def getall(self):
+        return self.recv_dict
+        
     def set(self,key='A_region', value=None):
         self.send_dict[key] = value
 
+    def set_name(self,name:str=None):
+        self.send_dict['Name'] = name
+
+    def set_type(self,type:str=None):
+        self.send_dict['Type'] = type
 
 
 
@@ -86,10 +124,10 @@ if __name__ == "__main__":
     while True:
         if sc.recv_flag is True:
             # get
-            print(sc.get('K_region'))
-            # set
-            for value in range(0, 100, 10):         
-                sc.set("A_region", value)
-        time.sleep(2)
+            print(sc.recv_dict)
+            # set       
+            sc.send_dict = 'ok'
+
+        time.sleep(0.1)
 
 
