@@ -36,7 +36,7 @@ def main():
     print('ip : %s'%ip)
 
     Vilib.camera_start(vflip=False,hflip=False)
-    Vilib.display()
+    Vilib.display(local=False, web=True)
          
     while True:
         print(sc.send_dict)
