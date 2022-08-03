@@ -7,7 +7,6 @@ import threading
 
 class SunFounderController():
 
-
     send_dict = {
         'Name': '',
         'Type': None,
@@ -43,10 +42,11 @@ class SunFounderController():
         self.loop = asyncio.get_event_loop()
         self.thread = threading.Thread(target=self.start_work, name="Websocket_thread")
         self.is_received = False
+        self.started = False
         
     async def main(self, websocket, path):
         print('client conneted')
-        while True:
+        while self.started:
             try:
                 # recv
                 try:
@@ -83,7 +83,8 @@ class SunFounderController():
                 # disconneted flag
                 print(connection_code)
                 print('client disconneted')
-                break   
+                break
+        print("Websocket main Closed")
 
     def data_processing(self):
         if self.recv_dict['Heart'] == 'ping':    
@@ -95,6 +96,7 @@ class SunFounderController():
     
 
     def start(self):
+        self.started = True
         self.thread.start()
 
     def get(self,key='A', default=None):
@@ -114,7 +116,11 @@ class SunFounderController():
     def set_type(self,type:str=None):
         self.send_dict['Type'] = type
 
-
+    def close(self):
+        self.started = False
+        self.loop.call_soon_threadsafe(self.loop.stop)
+        self.thread.join()
+        self.loop.call_soon_threadsafe(self.loop.close)
 
 if __name__ == "__main__":
     sc = SunFounderController()
