@@ -92,8 +92,6 @@ def main():
         sc.set('video','http://'+ip+':9000/mjpg')
         sc.set("A", speed)
 
-        # sc.set("E", speed)
-
         grayscale_data = px.get_grayscale_data()
         # print(px.get_grayscale_data())
         sc.set("D", grayscale_data )
@@ -103,19 +101,10 @@ def main():
         # sc.set("L", [0,distance])
         sc.set("F", distance)
 
-
-
-        # print(sc.send_dict)
-        
-        # get data   
-        # recv = sc.getall()
-        # print(recv)     
-
-
         # if sc.get('J') == True:
         #     horn()
 
-        print(sc.get('J'), type(sc.get('J')), speak)
+        # print(sc.get('J'), type(sc.get('J')), speak)
         if sc.get('J') != None:
             speak=sc.get('J')
         if speak == "forward":
@@ -128,7 +117,6 @@ def main():
             px.right(speed)
         else:
             px.stop()
-        # sleep(1)
             
         Joystick_K_Val = sc.get('K')
         if Joystick_K_Val != None:
@@ -143,7 +131,6 @@ def main():
             else:
                 px.stop()
 
-            
         if sc.get('I') == True:
             line_following()
         elif sc.get('E') == True:
@@ -193,10 +180,6 @@ def servos_test():
             px.set_camera_servo1_angle(angle)
             sleep(0.01)
 
-        # px.set_camera_servo1_angle(75)
-        # px.set_camera_servo2_angle(0)
-
-
 
 if __name__ == "__main__":
     try:
@@ -204,8 +187,5 @@ if __name__ == "__main__":
     finally:
         px.stop()
     # servos_test()
-    # while True:
-    #     horn()
-    #     sleep(1)  
 
 
