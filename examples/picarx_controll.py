@@ -1,3 +1,4 @@
+from sunfounder_controller import SunFounderController
 from picarx import Picarx
 from robot_hat import utils, Music
 from vilib import Vilib
@@ -6,6 +7,21 @@ from time import sleep
 
 utils.reset_mcu()
 sleep(0.5)
+
+
+sc = SunFounderController()
+sc.set_name('Picarx-001')
+sc.set_type('Picarx')
+sc.start()
+
+px = Picarx()
+speed = 50
+line_following_speed = 20
+line_following_angle_offset = 20
+avoid_obstacles_speed = 30
+
+music = Music()
+
 
 # get IP address
 def getIP():
@@ -19,27 +35,45 @@ def getIP():
 
     return wlan0,eth0
 
+
 def map(x, in_min, in_max, out_min, out_max):
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
-music = Music()
 
 def horn(): 
     status, result = utils.run_command('sudo killall pulseaudio')
     music.sound_effect_threading('./sounds/car-double-horn.wav')
     
 
+def avoid_obstacles():
+    px.forward(avoid_obstacles_speed)
+    distance = px.get_distance()
+    if distance > 0 and distance < 300:
+        if distance < 25:
+            px.set_dir_servo_angle(-35)
+        else:
+            px.set_dir_servo_angle(0)   
+
+
+def line_following():
+    gm_val_list = px.get_grayscale_data()
+    gm_status = px.get_line_status(gm_val_list)
+    if gm_status == 'forward':
+        px.forward(line_following_speed) 
+    elif gm_status == 'left':
+        px.set_dir_servo_angle(line_following_angle_offset)
+        px.forward(line_following_speed) 
+    elif gm_status == 'right':
+        px.set_dir_servo_angle(-line_following_angle_offset)
+        px.forward(line_following_speed) 
+    else:
+        px.set_dir_servo_angle(0)
+        px.stop()
+
+
+
 def main():
-
-    speed = 50
-
-    sc = SunFounderController()
-    sc.set_name('Picarx-001')
-    sc.set_type('Picarx')
-    sc.start()
-
-    px = Picarx()
-  
+    global speed
 
     wlan0,eth0 = getIP()
     if wlan0 != None:
@@ -50,23 +84,25 @@ def main():
 
     Vilib.camera_start(vflip=False,hflip=False)
     Vilib.display(local=False, web=True)
-         
+    speak = None
     while True:
-
-        sleep(0.2)
+        # sleep(0.2)
 
         # send data 
         sc.set('video','http://'+ip+':9000/mjpg')
         sc.set("A", speed)
-        sc.set("E", speed)
+
+        # sc.set("E", speed)
 
         grayscale_data = px.get_grayscale_data()
         # print(px.get_grayscale_data())
-        sc.set("D", [ grayscale_data[2], grayscale_data[1], grayscale_data[0]] )
+        sc.set("D", grayscale_data )
         
+
         distance = px.get_distance()
-        sc.set("L", [0,distance])
-        sc.set("M", distance)
+        # sc.set("L", [0,distance])
+        sc.set("F", distance)
+
 
 
         # print(sc.send_dict)
@@ -75,9 +111,25 @@ def main():
         # recv = sc.getall()
         # print(recv)     
 
-        if sc.get('J') == True:
-            horn()
 
+        # if sc.get('J') == True:
+        #     horn()
+
+        print(sc.get('J'), type(sc.get('J')), speak)
+        if sc.get('J') != None:
+            speak=sc.get('J')
+        if speak == "forward":
+            px.forward(speed)
+        elif speak == "backward":
+            px.backward(speed)
+        elif speak == "left":
+            px.left(speed)
+        elif speak == "right":
+            px.right(speed)
+        else:
+            px.stop()
+        # sleep(1)
+            
         Joystick_K_Val = sc.get('K')
         if Joystick_K_Val != None:
             dir_angle = map(Joystick_K_Val[0], -100, 100, -45, 45)
@@ -92,6 +144,12 @@ def main():
                 px.stop()
 
             
+        if sc.get('I') == True:
+            line_following()
+        elif sc.get('E') == True:
+            avoid_obstacles()
+
+
         if sc.get('N') == True:
             Vilib.color_detect("red")
         else:
@@ -141,7 +199,10 @@ def servos_test():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        px.stop()
     # servos_test()
     # while True:
     #     horn()
