@@ -7,14 +7,10 @@ Welcome to sf-controller's documentation!
 =========================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
 
+    install
+    create_controller
+    connect_ap_product
+    page_introduction
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

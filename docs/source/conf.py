@@ -64,8 +64,59 @@ import sphinx_rtd_theme
 html_theme = 'sphinx_rtd_theme'
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_js_files = [
-    'https://ezblock.cc/readDocFile/topHead.js',
+    'https://ezblock.cc/readDocFile/custom.js',
 ]
 html_css_files = [
-    'https://ezblock.cc/readDocFile/topHead.css',
+    'https://ezblock.cc/readDocFile/custom.css',
 ]
+
+# new
+rst_epilog = """
+
+.. |set| image:: img/icon/set.png  
+    :width: 20
+.. |edit| image:: img/icon/edit.png  
+    :width: 20
+
+.. |save| image:: img/icon/save.png  
+    :width: 20
+
+.. |delete| image:: img/icon/delete.png  
+    :width: 20
+.. |connect| image:: img/icon/connect.png  
+    :width: 20
+.. |sort| image:: img/icon/sort.png  
+    :width: 20
+.. |run| image:: img/icon/run.png  
+    :width: 20
+.. |radar| image:: img/icon/radar.png  
+    :width: 400
+.. |greyscale| image:: img/icon/greyscale.png  
+    :width: 400
+.. |slider| image:: img/icon/slider.png  
+    :width: 400
+.. |gauge| image:: img/icon/gauge.png  
+    :width: 400
+.. |button| image:: img/icon/button.png  
+    :width: 400
+.. |microphone| image:: img/icon/microphone.png  
+    :width: 400
+.. |number| image:: img/icon/number.png  
+    :width: 400
+.. |switch| image:: img/icon/switch.png  
+    :width: 400
+.. |joystick| image:: img/icon/joystick.png  
+    :width: 400
+.. |dpad| image:: img/icon/dpad.png  
+    :width: 400
+.. |throttle| image:: img/icon/throttle.png  
+    :width: 400
+.. |delete1| image:: img/icon/delete1.png  
+    :width: 400
+.. |bigsquare| image:: img/icon/bigsquare.png  
+    :width: 30
+.. |smallsquare| image:: img/icon/smallsquare.png  
+    :width: 20
+.. |longsquare| image:: img/icon/longsquare.png  
+    :width: 60
+"""
