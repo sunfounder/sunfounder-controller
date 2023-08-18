@@ -62,7 +62,7 @@ Edit/Save
 
 #. Tap the |edit| icon to enter the editing mode.
 
-    .. image:: img/preset_pico2.png
+    .. image:: img/preset_pico2.PNG
 
 #. At this point you can do the following with the controller, and when you're done tap the |save| button to save the changes.
 

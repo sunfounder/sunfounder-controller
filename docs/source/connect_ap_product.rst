@@ -18,7 +18,7 @@ How to Connect SunFounder Controller and Products
 
     .. note::
 
-        If it doesn’t search automatically, you can also manually enter the IP to connect.
+        If it doesn't search automatically, you can also manually enter the IP to connect.
 
         .. image:: img/sc-c-6.png
 

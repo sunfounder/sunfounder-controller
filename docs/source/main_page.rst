@@ -84,6 +84,6 @@ Create
 
     .. image:: img/preset_pico.png
 
-#. Upon entering, you will find some widgets have been added. If you don't need to modify anything, tap the |save| button to save this controller.
+#. After entering, the app will automatically search for your robot and establish a connection. Once connected, tap the "Run" button to start controlling your robot.
 
-    .. image:: img/preset_pico2.PNG
+    .. image:: img/create_preset.PNG
