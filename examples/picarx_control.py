@@ -120,8 +120,8 @@ def main():
             
         Joystick_K_Val = sc.get('K')
         if Joystick_K_Val != None:
-            dir_angle = map(Joystick_K_Val[0], -100, 100, -45, 45)
-            speed = Joystick_K_Val[1]
+            dir_angle = map(int(Joystick_K_Val[0]), -100, 100, -45, 45)
+            speed = int(Joystick_K_Val[1])
             px.set_dir_servo_angle(dir_angle)
             if speed > 0:
                 px.forward(speed)
