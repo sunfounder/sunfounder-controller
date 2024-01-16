@@ -2,10 +2,10 @@ import asyncio
 import websockets
 import json
 import time
-import os
 import threading
 
 class SunFounderController():
+    PORT = 8765
 
     send_dict = {
         'Name': '',
@@ -35,25 +35,54 @@ class SunFounderController():
     }
     
 
-    def __init__(self):
-        start_server = websockets.serve(self.main, "0.0.0.0", 8765)
-        tasks = asyncio.wait([start_server])
-        self.tasks = asyncio.ensure_future(tasks)
-        self.loop = asyncio.get_event_loop()
-        self.thread = threading.Thread(target=self.start_work, name="Websocket_thread")
+    def __init__(self, port=PORT):
+        self.port = port
+        self.server_thread = threading.Thread(target=self.work)
+        self.server_thread.daemon = True
+        self.client_num = 0
+        self.client = {}
         self.is_received = False
-        self.started = False
-        
-    async def main(self, websocket, path):
-        print('client conneted')
-        while self.started:
+
+    def start(self):
+        self.work_flag = True
+        self.server_thread.start()
+
+    def close(self):
+        self.server.close()
+        self.work_flag = False
+        # print('close done1')
+        # print( self.server_thread.is_alive())
+        # self.server_thread.join()
+        while len(self.client):
+            time.sleep(0.01)
+        print('close done')
+
+    def work(self):
+        asyncio.run(self.main())
+
+    async def main(self):
+        self.server = await websockets.serve(self.handler, "0.0.0.0", self.port)
+        print(f'websocket server start at port {self.port}')
+        async with self.server:
+            await asyncio.Future() # run forever
+        print('server closed')
+
+    async def handler(self, websocket):
+        _client_num = self.client_num
+        _client_ip = websocket.remote_address[0]
+        self.client_num  += 1
+        self.client[str(_client_num)] = _client_ip
+        print(f'client {_client_num, _client_ip} conneted')
+        # print(websocket.remote_address)
+
+        while self.work_flag:
             try:
                 # recv
                 try:
                     tmp = await asyncio.wait_for(websocket.recv(), timeout=0.001)
                     # print("websocket.recv() temp: %s" % tmp)
                 except asyncio.TimeoutError as e:
-                    # log('asyncio.TimeoutError : %s'%e)
+                    # print('asyncio.TimeoutError : %s'%e)
                     pass
 
                 # send
@@ -73,6 +102,7 @@ class SunFounderController():
                     else:
                         print("JSONDecodeError")
                 except json.decoder.JSONDecodeError:
+                    self.is_received = False
                     print("JSONDecodeError")
                 except Exception as e:
                     pass
@@ -81,23 +111,21 @@ class SunFounderController():
 
             except websockets.exceptions.ConnectionClosed as connection_code:
                 # disconneted flag
-                print(connection_code)
-                print('client disconneted')
+                print(f'{_client_num}: {connection_code}')
+                print(f'client {_client_num, _client_ip} disconneted')
                 break
-        print("Websocket main Closed")
+
+        self.client.pop(str(_client_num))
+        self.is_closed = True
 
     def data_processing(self):
-        if self.recv_dict['Heart'] == 'ping':    
+        if self.recv_dict['Heart'] == 'ping':
             self.send_dict['Heart'] = 'pong'
 
     def start_work(self):
         print('Start!')
         self.loop.run_forever()
-    
 
-    def start(self):
-        self.started = True
-        self.thread.start()
 
     def get(self,key='A', default=None):
         # if not isinstance(self.recv_dict, dict):
@@ -116,23 +144,21 @@ class SunFounderController():
     def set_type(self,type:str=None):
         self.send_dict['Type'] = type
 
-    def close(self):
-        self.started = False
-        self.loop.call_soon_threadsafe(self.loop.stop)
-        self.thread.join()
-        self.loop.call_soon_threadsafe(self.loop.close)
 
 if __name__ == "__main__":
     sc = SunFounderController()
     sc.start()
     
-    while True:
-        if sc.is_received is True:
-            # get
-            print(sc.recv_dict)
-            # set       
-            sc.send_dict = 'ok'
+    try:
+        while True:
+            if sc.is_received is True:
+                # get
+                print(sc.recv_dict)
+                # set       
+                sc.send_dict = 'ok'
 
-        time.sleep(0.1)
+            time.sleep(0.1)
+    finally:
+        sc.close()
 
 
