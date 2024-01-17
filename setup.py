@@ -22,11 +22,11 @@ setup(
     # https://packaging.python.org/en/latest/single_source_version.html
     version=__version__,
 
-    description='Picrawler gait Library for Raspberry Pi',
+    description='SunFounder Controller for Raspberry Pi',
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/sunfounder/picrawler',
+    url='https://github.com/sunfounder/sunfounder-controller',
 
     # Author details
     author='SunFounder',
@@ -53,13 +53,10 @@ setup(
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
     ],
 
     # What does your project relate to?
-    keywords='python raspberry pi GPIO sunfounder',
+    keywords='sunfounder, sunfounder controller',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
@@ -69,7 +66,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['robot_hat', 'websockets'],
+    install_requires=['websockets'],
  
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow
