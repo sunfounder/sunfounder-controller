@@ -159,8 +159,8 @@ def main():
             # tilt = map(Joystick_Q_Val[1], -100, 100, -35, 75)
             pan = min(90,max(-90,Joystick_Q_Val[0]))
             tilt = min(75, max(-35, Joystick_Q_Val[1]))
-            px.set_camera_servo1_angle(tilt)
-            px.set_camera_servo2_angle(pan)
+            px.set_camera_servo1_angle(pan)
+            px.set_camera_servo2_angle(tilt)
 
 
 def servos_test():
