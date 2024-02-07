@@ -15,7 +15,7 @@
 # asyncio.run(main())
 
 ''''###########################################################
-python -m websockets ws://localhost:8765/
+python3 -m websockets ws://localhost:8765/
 ###########################################################'''
 
 #!/usr/bin/env python3
