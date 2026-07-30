@@ -3,6 +3,16 @@ import websockets
 import json
 import time
 import threading
+import os
+
+# Debug logging controlled by env var SF_CONTROLLER_DEBUG=1
+_DEBUG = os.environ.get('SF_CONTROLLER_DEBUG', '0') == '1'
+
+def _debug(msg):
+    """Print debug message with timestamp if debug mode is on."""
+    if _DEBUG:
+        print(f'[SF_CONTROLLER_DEBUG] {time.strftime("%H:%M:%S")} {msg}')
+
 
 class SunFounderController():
     PORT = 8765
@@ -73,47 +83,67 @@ class SunFounderController():
         self.client_num  += 1
         self.client[str(_client_num)] = _client_ip
         print(f'client {_client_num, _client_ip} conneted')
-        # print(websocket.remote_address)
+        _debug(f'client {_client_num, _client_ip} connected, total clients: {self.client_num}')
+        _debug(f'websocket headers: {dict(websocket.request_headers)}')
 
+        msg_count = 0
         while self.work_flag:
             try:
                 # recv
+                tmp = None
+                recv_bytes = 0
                 try:
                     tmp = await asyncio.wait_for(websocket.recv(), timeout=0.001)
-                    # print("websocket.recv() temp: %s" % tmp)
-                except asyncio.TimeoutError as e:
-                    # print('asyncio.TimeoutError : %s'%e)
+                    recv_bytes = len(tmp.encode('utf-8')) if isinstance(tmp, str) else len(tmp)
+                    _debug(f'[RECV] client={_client_num} bytes={recv_bytes} raw={repr(tmp)[:500]}')
+                except asyncio.TimeoutError:
                     pass
+                except Exception as e:
+                    _debug(f'[RECV ERROR] client={_client_num} exception={type(e).__name__}: {e}')
+                    raise
 
                 # send
+                send_payload = json.dumps(self.send_dict)
+                send_bytes = len(send_payload.encode('utf-8'))
                 try:
-                    # print(json.dumps(self.send_dict))
-                    await websocket.send(json.dumps(self.send_dict))
+                    await websocket.send(send_payload)
+                    if msg_count == 0 or _DEBUG:
+                        _debug(f'[SEND] client={_client_num} bytes={send_bytes} payload={repr(send_payload)[:200]}')
                 except Exception as e:
+                    _debug(f'[SEND ERROR] client={_client_num} exception={type(e).__name__}: {e}')
                     print('send Exception: %s'%e)
 
-                # 
-                try:
-                    tmp = json.loads(tmp)
-                    if isinstance(tmp, dict):
-                        self.recv_dict = tmp
-                        self.is_received = True
-                        self.data_processing()
-                    else:
+                # parse recv data
+                if tmp is not None:
+                    try:
+                        tmp = json.loads(tmp)
+                        if isinstance(tmp, dict):
+                            self.recv_dict = tmp
+                            self.is_received = True
+                            self.data_processing()
+                            _debug(f'[PARSED] client={_client_num} keys={list(tmp.keys())} heart={tmp.get("Heart","N/A")}')
+                        else:
+                            _debug(f'[PARSE ERROR] client={_client_num} not a dict: {type(tmp).__name__}')
+                            print("JSONDecodeError")
+                    except json.decoder.JSONDecodeError:
+                        self.is_received = False
+                        _debug(f'[PARSE ERROR] client={_client_num} JSONDecodeError')
                         print("JSONDecodeError")
-                except json.decoder.JSONDecodeError:
-                    self.is_received = False
-                    print("JSONDecodeError")
-                except Exception as e:
-                    pass
+                    except Exception as e:
+                        _debug(f'[PARSE ERROR] client={_client_num} {type(e).__name__}: {e}')
 
+                msg_count += 1
                 await asyncio.sleep(0.01)
 
             except websockets.exceptions.ConnectionClosed as connection_code:
                 # disconneted flag
+                _debug(f'[CLOSE] client={_client_num} code={connection_code} total_msgs={msg_count}')
                 print(f'{_client_num}: {connection_code}')
                 print(f'client {_client_num, _client_ip} disconneted')
                 break
+            except Exception as e:
+                _debug(f'[HANDLER ERROR] client={_client_num} {type(e).__name__}: {e}')
+                raise
 
         self.client.pop(str(_client_num))
         self.is_closed = True

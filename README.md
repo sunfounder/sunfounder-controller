@@ -1,90 +1,83 @@
-
 # SunFounder Controller
 
-## SunFounder Controller examples
+SunFounder Controller provides a WebSocket-based controller for Raspberry Pi robots. It enables real-time bidirectional communication between a web/mobile client and your robot over the local network.
 
-    - start()
-        start webserver
-    - get(key='A_region')
-        get the returned value
-    - set(key='A_region', value=None)    
-        send value
+## Quick Start
 
-
-
-Quick Links:
-
-
-## About this kit
-
-We are happy to see your issus and pull request. Feel free to be apart.
-
-## About SunFounder Controller :
-
-## Download
-
-Download this repository to your Raspberry Pi:
+Install from source:
 
 ```shell
 git clone https://github.com/sunfounder/sunfounder-controller.git
+cd sunfounder-controller
+sudo python3 setup.py install
 ```
 
 ## Usage
 
-Before running the example, stop ezblock sercive
-
 ```python
-sudo service ezblock stop
+from sunfounder_controller import SunFounderController
+
+sc = SunFounderController()
+
+# Start the WebSocket server
+sc.start()
+
+# Send a value to connected clients
+sc.set('A_region', value)
+
+# Read a value from clients
+value = sc.get('A')
 ```
 
-Then run the example
+## Debug Mode
+
+Enable debug logging to troubleshoot WebSocket connections and message flow:
+
+```shell
+SF_CONTROLLER_DEBUG=1 python3 your_script.py
+```
+
+Or set it in your script before importing:
+
+```python
+import os
+os.environ['SF_CONTROLLER_DEBUG'] = '1'
+```
+
+Debug output is prefixed with `[SF_CONTROLLER_DEBUG]` and includes timestamps, connection/disconnection events, raw message dumps, and parse errors.
+
+## Examples
+
+See the `examples/` directory. Run with:
 
 ```bash
 cd examples
 sudo python3 xxx.py
 ```
 
-Stop running the example by using <kbd>Ctrl</kbd>+<kbd>C</kbd>
+Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop.
 
+## API Reference
 
-
-
-## Update
-
-- 2020-6-12: New Release
-
-## Trouble Shootings
-
-## About SunFounder
-SunFounder is a technology company focused on Raspberry Pi and Arduino open source community development. Committed to the promotion of open source culture, we strives to bring the fun of electronics making to people all around the world and enable everyone to be a maker. Our products include learning kits, development boards, robots, sensor modules and development tools. In addition to high quality products, SunFounder also offers video tutorials to help you make your own project. If you have interest in open source or making something cool, welcome to join us!
-
-## About Ezblock
-
-Ezblock is a technology company focused on Raspberry Pi and Arduino open source community development. Committed to the promotion of open source culture, we strives to bring the fun of electronics making to people all around the world and enable everyone to be a maker. Our products include learning kits, development boards, robots, sensor modules and development tools. In addition to high quality products, Ezblock also offers video tutorials to help you make your own project. If you have interest in open source or making something cool, welcome to join us!
+| Method | Description |
+|--------|-------------|
+| `start()` | Start the WebSocket server on port 8765 |
+| `get(key='A', default=None)` | Get a value from `recv_dict` by key |
+| `getall()` | Return the full `recv_dict` |
+| `set(key='A_region', value=None)` | Send a value to clients via `send_dict` |
+| `set_name(name)` | Set the controller name sent to clients |
+| `set_type(type)` | Set the controller type sent to clients |
+| `close()` | Shut down the WebSocket server |
 
 ## License
 
-This is the code for PiCrawler.
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied wa rranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+## About SunFounder
 
-You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+SunFounder is a technology company focused on Raspberry Pi and Arduino open source community development. Committed to the promotion of open source culture, we strive to bring the fun of electronics making to people all around the world and enable everyone to be a maker. Our products include learning kits, development boards, robots, sensor modules and development tools. In addition to high quality products, SunFounder also offers video tutorials to help you make your own project.
 
-PiCrawler examples comes with ABSOLUTELY NO WARRANTY; for details checkout [LICENCE](LICENCE). This is free software, and you are welcome to redistribute it under certain conditions; checkout [LICENCE](LICENCE) for details.
+## Contact
 
-SunFounder, Inc., hereby disclaims all copyright interest in the program 'PiCrawler examples' (which makes passes at compilers).
-
-Mike Huang, 21 August 2015
-
-Mike Huang, Chief Executive Officer
-
-Email: service@sunfounder.com
-
-## Contact us
-
-website:
-    ezblock.cc
-
-E-mail:
-    service@sunfounder.com
+- Website: [sunfounder.com](https://www.sunfounder.com)
+- Email: service@sunfounder.com
