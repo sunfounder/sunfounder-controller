@@ -3,6 +3,7 @@ from picarx import Picarx
 from robot_hat import utils, Music
 from vilib import Vilib
 import os
+import time
 from time import sleep
 
 utils.reset_mcu()
@@ -85,6 +86,7 @@ def main():
     Vilib.camera_start(vflip=False,hflip=False)
     Vilib.display(local=False, web=True)
     speak = None
+    ack_ts = 0
     while True:
         # sleep(0.2)
 
@@ -101,12 +103,18 @@ def main():
         # sc.set("L", [0,distance])
         sc.set("F", distance)
 
-        # if sc.get('J') == True:
-        #     horn()
-
-        # print(sc.get('J'), type(sc.get('J')), speak)
-        if sc.get('J') != None:
-            speak=sc.get('J')
+        # ---- J-key voice protocol: receive → ack(1) → execute → done(0, App clears) ----
+        j = sc.get('J')
+        if j not in (None, ''):              # voice command present
+            if j != speak:                   # edge-trigger: only run on new command (repeat allowed)
+                speak = j
+                sc.set("J", 1)              # ① ack: tell App we're handling it
+                ack_ts = time.time()
+        else:
+            if speak is not None and time.time() - ack_ts > 0.3:   # ② ack(1) sent long enough for App to receive
+                sc.set("J", 0)              # ③ done: App clears the send value
+                speak = None                 # ④ reset, ready for next command
+        # ----
         if speak == "forward":
             px.forward(speed)
         elif speak == "backward":

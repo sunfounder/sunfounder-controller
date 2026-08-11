@@ -10,6 +10,16 @@
     - set(key='A_region', value=None)    
         send value
 
+## Voice control (J key)
+
+In `picarx_control.py`, the J key uses an ack protocol with the App:
+
+1. Device receives a voice command (`J`) → sends `J: 1` (ack, action in progress)
+2. Device executes the action (~0.3s, adjustable via `ack_ts` threshold)
+3. Device sends `J: 0` (action done) → App clears the pending command
+
+This prevents the last voice command from repeating forever and allows repeated identical commands to trigger again (edge-triggered).
+
 
 
 Quick Links:
